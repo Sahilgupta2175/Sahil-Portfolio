@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect } from 'react'
 import {
   Moon,
   Sun,
@@ -17,8 +17,9 @@ import {
   ChevronDown,
   CheckCircle,
   AlertCircle,
-} from "lucide-react";
-import { Button } from "./components/ui/button";
+} from "lucide-react"
+import { Button } from "./components/ui/button"
+import { sendEmail, sendFormspree, sendNetlifyForm } from "./lib/emailService"
 
 export default function App() {
   const [isDark, setIsDark] = useState(false);
@@ -73,29 +74,40 @@ export default function App() {
 
     const form = e.currentTarget;
     const formData = new FormData(form);
-    const name = formData.get("name");
-    const email = formData.get("email");
-    const subject = formData.get("subject");
-    const message = formData.get("message");
+    const formDataObj = {
+      name: formData.get("name"),
+      email: formData.get("email"),
+      subject: formData.get("subject"),
+      message: formData.get("message"),
+    };
 
     try {
-      console.log("Form submitted:", { name, email, subject, message });
+      // Option 1: Use EmailJS (recommended)
+      const result = await sendEmail(formDataObj);
       
-      await new Promise((resolve) => setTimeout(resolve, 2000));
+      // Option 2: Use Formspree (uncomment to use)
+      // const result = await sendFormspree(formDataObj);
       
-      setSubmitStatus({
-        type: "success",
-        message: `Thank you ${name}! Your message about "${subject}" has been received.`,
-      });
-      
-      if (form) {
-        form.reset();
+      // Option 3: Use Netlify Forms (uncomment if deployed on Netlify)
+      // const result = await sendNetlifyForm(formDataObj);
+
+      if (result.success) {
+        setSubmitStatus({
+          type: "success",
+          message: result.message || `Thank you ${formDataObj.name}! Your message has been sent successfully.`,
+        });
+        
+        if (form) {
+          form.reset();
+        }
+      } else {
+        throw new Error(result.message);
       }
     } catch (error) {
       console.error("Error:", error);
       setSubmitStatus({
         type: "error",
-        message: "Failed to send message. Please try again.",
+        message: error.message || "Failed to send message. Please try again.",
       });
     } finally {
       setIsSubmitting(false);
