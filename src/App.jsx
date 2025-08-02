@@ -19,7 +19,7 @@ import {
   AlertCircle,
 } from "lucide-react"
 import { Button } from "./components/ui/button"
-import { sendEmail, sendFormspree, sendNetlifyForm } from "./lib/emailService"
+import { sendEmail } from "./lib/emailService"
 
 export default function App() {
   const [isDark, setIsDark] = useState(false);
